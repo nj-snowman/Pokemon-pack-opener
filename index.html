@@ -2,309 +2,1114 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Pokémon Pack Opener</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Card Pack Opener</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;transition:background 0.8s;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e)}
-  h1{font-size:2.2rem;font-weight:800;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.5);margin-bottom:4px}
-  .subtitle{color:#aaa;font-size:.9rem;margin-bottom:8px}
-  .trigger{background:#000;border:1px solid #333;color:#fde047;font-family:monospace;padding:2px 10px;border-radius:6px;font-size:.85rem}
-  .btn{cursor:pointer;border:none;font-weight:700;border-radius:12px;transition:transform .15s,box-shadow .15s;padding:12px 32px;font-size:1rem}
-  .btn:hover{transform:scale(1.05)}
-  .btn:active{transform:scale(.97)}
-  .btn-primary{background:#facc15;color:#1a1a1a;box-shadow:0 4px 20px rgba(250,204,21,0.4)}
-  .btn-secondary{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2)}
-  .set-badge{font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:4px}
-  .order-hint{color:#aaa;font-size:.75rem;margin-bottom:2px}
-  .order-hint span{margin:0 3px}
-  .counter{color:#777;font-size:.75rem;margin-bottom:12px}
-  #grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;max-width:700px;margin-bottom:16px}
-  .card-wrap{border-radius:12px;border:2px solid #444;background:#111;overflow:hidden;display:flex;flex-direction:column;min-height:170px;transition:transform .2s,box-shadow .2s;position:relative}
-  .card-wrap.face-down{opacity:.3;cursor:default}
-  .card-wrap.current{border-color:#6366f1;opacity:1;cursor:pointer;animation:pulse 1.4s infinite}
-  .card-wrap.current:hover{transform:scale(1.06)}
-  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.5)}50%{box-shadow:0 0 0 8px rgba(99,102,241,0)}}
-  .card-img-wrap{height:120px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .card-img-wrap img{width:100%;height:100%;object-fit:contain;display:block}
-  .card-img-wrap .fallback{font-size:2rem;color:#555}
-  .card-info{padding:6px 4px;text-align:center}
-  .card-name{color:#eee;font-size:.7rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .badge{display:inline-block;margin-top:3px;padding:1px 7px;border-radius:99px;font-size:.6rem;font-weight:700}
-  .holo-overlay{position:absolute;inset:0;pointer-events:none;border-radius:10px;overflow:hidden;z-index:5}
-  .holo-overlay::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 25%,rgba(255,215,0,.28) 45%,rgba(255,80,200,.18) 55%,transparent 75%);animation:shimmer 2.2s ease-in-out infinite}
-  @keyframes shimmer{0%{transform:translateX(-120%) skewX(-12deg)}100%{transform:translateX(220%) skewX(-12deg)}}
-  .face-down .card-img-wrap::after,.face-down .card-info{display:none}
-  .face-down .card-img-wrap{height:100%;min-height:130px;background:repeating-linear-gradient(135deg,#1a1a2e 0,#1a1a2e 10px,#16213e 10px,#16213e 20px)}
-  .current .card-img-wrap{height:100%;min-height:130px;background:linear-gradient(135deg,#1e1b4b,#312e81);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
-  .current .tap-hint{color:#c7d2fe;font-size:.7rem;font-weight:700}
-  .current .card-icon{font-size:2rem}
-  .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px}
-  .holo-wrap .card-wrap{border-color:#f59e0b}
-  .result-msg{color:#fde047;font-weight:700;font-size:1.1rem;margin-bottom:8px;text-align:center}
-  .result-sub{color:#888;font-size:.8rem;margin-bottom:12px;text-align:center}
-  #idle-screen,#pack-screen{display:flex;flex-direction:column;align-items:center}
-  #pack-screen{width:100%;max-width:720px}
-  /* rarity colours */
-  .r-holo{border-color:#f59e0b!important;background:linear-gradient(135deg,#1c1400,#2d1f00)}
-  .r-rare{border-color:#ca8a04!important}
-  .r-uncommon{border-color:#3b82f6!important}
-  .r-common{border-color:#6b7280!important}
-  .r-energy{border-color:#10b981!important}
-  .b-holo{background:#f59e0b;color:#000}
-  .b-rare{background:#ca8a04;color:#fff}
-  .b-uncommon{background:#3b82f6;color:#fff}
-  .b-common{background:#6b7280;color:#fff}
-  .b-energy{background:#10b981;color:#fff}
-  /* bg themes */
-  body.bg-base{background:linear-gradient(135deg,#0c1a3a,#1e3a5f,#3b2a00)}
-  body.bg-jungle{background:linear-gradient(135deg,#052e16,#14532d,#365314)}
-  body.bg-fossil{background:linear-gradient(135deg,#1c1008,#3b2412,#44381c)}
+:root{
+  --bg:#08080f;--surface:#12121e;--surface2:#1c1c2e;--surface3:#26263a;
+  --text:#e8e8f4;--text-dim:#7878a0;--text-muted:#4a4a6a;
+  --radius:14px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;overflow-x:hidden;transition:background .6s}
+
+/* ── UTILITY ──────────────────────────────────────────────────── */
+.hidden{display:none!important}
+.screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px;padding-bottom:32px}
+.btn{cursor:pointer;border:none;font-weight:700;border-radius:var(--radius-sm);padding:12px 24px;font-size:.95rem;transition:transform .12s,box-shadow .12s,opacity .12s;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--surface3)}
+.btn-sm{padding:8px 16px;font-size:.82rem}
+.back-btn{background:none;border:none;color:var(--text-dim);font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:6px;padding:8px;border-radius:8px;transition:color .15s}
+.back-btn:hover{color:var(--text)}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.62rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase}
+.section-title{font-size:1rem;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+.pill-tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+.pill-tab{background:var(--surface2);color:var(--text-dim);border:none;padding:8px 18px;border-radius:99px;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s}
+.pill-tab.active{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff}
+
+/* ── GAME THEMES ───────────────────────────────────────────────── */
+body.theme-pokemon{--g1:#cc0000;--g2:#ff6600;background:radial-gradient(ellipse at top,#1a0505 0%,#08080f 70%)}
+body.theme-mtg    {--g1:#1a5c2e;--g2:#c9a227;background:radial-gradient(ellipse at top,#041008 0%,#08080f 70%)}
+body.theme-ygo    {--g1:#4a1090;--g2:#8b0000;background:radial-gradient(ellipse at top,#0d0120 0%,#08080f 70%)}
+body.theme-home   {--g1:#6d28d9;--g2:#7c3aed;background:radial-gradient(ellipse at top,#0d0520 0%,#08080f 70%)}
+
+/* ── HOME SCREEN ──────────────────────────────────────────────── */
+#s-home{justify-content:center;gap:0}
+.home-logo{font-size:3.5rem;margin-bottom:4px;filter:drop-shadow(0 0 20px rgba(150,100,255,.5))}
+.home-title{font-size:2rem;font-weight:900;background:linear-gradient(135deg,#a78bfa,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.home-sub{color:var(--text-dim);font-size:.9rem;margin-bottom:32px}
+.game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;width:100%;max-width:920px;margin-bottom:24px}
+.game-card{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius);padding:24px;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;position:relative;overflow:hidden}
+.game-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;background:linear-gradient(135deg,var(--gc1,#6d28d9),var(--gc2,#7c3aed))}
+.game-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.5);border-color:var(--gc1,#7c3aed)}
+.game-card:hover::before{opacity:.08}
+.game-card:active{transform:scale(.97)}
+.game-icon{font-size:2.5rem;margin-bottom:12px;display:block}
+.game-name{font-size:1.15rem;font-weight:800;margin-bottom:4px}
+.game-desc{color:var(--text-dim);font-size:.82rem;line-height:1.5}
+.gc-pokemon{--gc1:#cc0000;--gc2:#ff6600}
+.gc-mtg    {--gc1:#1a5c2e;--gc2:#c9a227}
+.gc-ygo    {--gc1:#4a1090;--gc2:#8b0000}
+.collection-link{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius-sm);padding:12px 24px;color:var(--text-dim);cursor:pointer;font-size:.9rem;font-weight:600;transition:all .2s}
+.collection-link:hover{color:var(--text);border-color:#7c3aed}
+
+/* ── SET SELECT SCREEN ────────────────────────────────────────── */
+#s-sets{padding-top:24px}
+.screen-header{width:100%;max-width:700px;display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.screen-header-title{font-size:1.3rem;font-weight:800}
+.set-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;width:100%;max-width:700px}
+.set-card{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.set-card:hover{transform:translateY(-3px);border-color:var(--g1,#7c3aed);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.set-card:active{transform:scale(.97)}
+.set-symbol{font-size:2rem;margin-bottom:8px}
+.set-name{font-weight:800;font-size:1rem;margin-bottom:2px}
+.set-meta{color:var(--text-dim);font-size:.78rem}
+.set-total{position:absolute;top:12px;right:12px;color:var(--text-muted);font-size:.72rem}
+.set-owned{font-size:.78rem;font-weight:700;margin-top:6px}
+
+/* ── PACK OPEN SCREEN ─────────────────────────────────────────── */
+#s-pack{padding-top:16px;gap:0}
+.pack-header{width:100%;max-width:500px;display:flex;align-items:center;gap:8px;margin-bottom:20px}
+.pack-set-label{font-weight:700;font-size:.95rem;flex:1;text-align:center}
+
+/* Pack visual */
+.pack-stage{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;flex:1;position:relative}
+#pack-wrap{position:relative;width:min(240px,62vw);user-select:none;touch-action:none;flex-shrink:0}
+.pack-body{width:100%;aspect-ratio:.65;border-radius:12px;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.7);transition:transform .3s}
+.pack-flap{position:absolute;top:0;left:0;right:0;height:22%;background:linear-gradient(135deg,var(--flap1),var(--flap2));z-index:10;transform-origin:top center;transition:transform .6s cubic-bezier(.4,0,.2,1);border-radius:12px 12px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:4px;overflow:hidden}
+.pack-flap.opened{transform:perspective(400px) rotateX(-150deg)}
+.pack-flap-inner{font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:2px}
+.tear-line{position:absolute;bottom:0;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(255,255,255,.5) 4px,rgba(255,255,255,.5) 8px)}
+.tear-progress{position:absolute;bottom:0;left:0;height:3px;background:rgba(255,255,255,.9);transition:width .05s linear;box-shadow:0 0 8px rgba(255,255,255,.8)}
+.scissors{position:absolute;right:calc(100% - var(--tear-pct,0%) - 12px);bottom:-10px;font-size:1rem;transition:right .05s linear;filter:drop-shadow(0 0 4px rgba(255,255,255,.8))}
+.pack-art{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:linear-gradient(160deg,var(--art1),var(--art2));position:relative}
+.pack-art-logo{font-size:2.5rem;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5))}
+.pack-art-name{font-size:.85rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.9);text-align:center;line-height:1.3}
+.pack-art-set{font-size:.65rem;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase}
+.pack-art-shine{position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18) 0%,transparent 50%,rgba(255,255,255,.06) 100%);pointer-events:none}
+.pack-seal{position:absolute;bottom:0;left:0;right:0;height:15%;background:linear-gradient(to top,rgba(0,0,0,.4),transparent);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase}
+
+/* Swipe zone */
+#swipe-zone{position:absolute;top:0;left:0;right:0;height:22%;cursor:ew-resize;z-index:20}
+.swipe-hint{position:absolute;bottom:calc(22% + 12px);left:50%;transform:translateX(-50%);white-space:nowrap;color:var(--text-dim);font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:6px;animation:hint-pulse 2s ease-in-out infinite}
+@keyframes hint-pulse{0%,100%{opacity:.5;transform:translateX(-50%) translateY(0)}50%{opacity:1;transform:translateX(-50%) translateY(-3px)}}
+.swipe-arrow{display:inline-block;animation:arrow-slide 1.2s ease-in-out infinite}
+@keyframes arrow-slide{0%,100%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+
+/* Pack shake animation */
+@keyframes pack-shake{0%,100%{transform:rotate(0deg)}20%{transform:rotate(-3deg)}40%{transform:rotate(3deg)}60%{transform:rotate(-2deg)}80%{transform:rotate(2deg)}}
+.pack-shaking{animation:pack-shake .5s ease-in-out}
+
+/* Cards area */
+#cards-area{width:100%;max-width:720px;margin-top:8px}
+.cards-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.reveal-counter{color:var(--text-dim);font-size:.82rem}
+.reveal-actions{display:flex;gap:8px;flex-wrap:wrap}
+#cards-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+@media(max-width:500px){#cards-grid{grid-template-columns:repeat(5,1fr);gap:6px}}
+@media(max-width:380px){#cards-grid{grid-template-columns:repeat(5,1fr);gap:4px}}
+
+/* Card tiles */
+.c-tile{border-radius:10px;border:2px solid var(--surface3);background:var(--surface);overflow:hidden;position:relative;display:flex;flex-direction:column;cursor:pointer;transition:transform .2s,box-shadow .2s;aspect-ratio:.72}
+.c-tile.face-down{opacity:.35;cursor:default}
+.c-tile.current{border-color:#7c3aed;cursor:pointer;animation:tile-pulse 1.5s ease-in-out infinite}
+.c-tile.current:hover{transform:scale(1.06)}
+@keyframes tile-pulse{0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,.4)}50%{box-shadow:0 0 0 6px rgba(124,58,237,0)}}
+.c-tile.revealed{cursor:default}
+.c-tile-img{flex:1;background:#111;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.c-tile-img img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .3s}
+.c-tile-fallback{font-size:1.6rem;color:var(--text-muted)}
+.c-tile-info{padding:4px 3px;text-align:center;background:rgba(0,0,0,.6)}
+.c-tile-name{font-size:.55rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.c-tile-price{font-size:.52rem;color:#6ee7b7;font-weight:600}
+.holo-overlay{position:absolute;inset:0;pointer-events:none;z-index:5;border-radius:8px;overflow:hidden}
+.holo-overlay::after{content:'';position:absolute;inset:-20%;background:linear-gradient(110deg,transparent 20%,rgba(255,215,0,.35) 40%,rgba(255,80,200,.25) 55%,rgba(100,180,255,.2) 65%,transparent 80%);animation:holo-shimmer 2s ease-in-out infinite}
+@keyframes holo-shimmer{0%{transform:translateX(-100%) skewX(-12deg)}100%{transform:translateX(200%) skewX(-12deg)}}
+
+/* face-down pattern */
+.c-tile.face-down .c-tile-img{background:repeating-linear-gradient(135deg,#12121e 0,#12121e 8px,#0e0e1a 8px,#0e0e1a 16px)}
+.c-tile.face-down .c-tile-info{display:none}
+/* current state */
+.c-tile.current .c-tile-img{background:linear-gradient(135deg,#1e1b4b,#312e81);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.tap-hint{color:#c7d2fe;font-size:.55rem;font-weight:700}
+.card-icon{font-size:1.4rem}
+
+/* Rarity colours */
+.r-mythic,.r-secret{border-color:#f97316!important;background:linear-gradient(160deg,#1c0a00,#2d1200)}
+.r-holo,.r-ultra,.r-ultra-rare,.r-ultra\ rare{border-color:#f59e0b!important;background:linear-gradient(160deg,#1c1400,#2d1f00)}
+.r-rare,.r-super,.r-super-rare,.r-super\ rare{border-color:#ca8a04!important}
+.r-uncommon{border-color:#3b82f6!important}
+.r-common{border-color:#374151!important}
+.r-energy,.r-land{border-color:#10b981!important}
+.b-mythic,.b-secret{background:linear-gradient(135deg,#f97316,#ef4444);color:#fff}
+.b-ultra,.b-ultra-rare,.b-ultra\ rare,.b-holo{background:linear-gradient(135deg,#f59e0b,#f97316);color:#000}
+.b-rare,.b-super,.b-super-rare,.b-super\ rare{background:#ca8a04;color:#fff}
+.b-uncommon{background:#3b82f6;color:#fff}
+.b-common{background:#374151;color:#fff}
+.b-energy,.b-land{background:#10b981;color:#fff}
+
+/* Card flip animation */
+@keyframes card-flip{0%{transform:rotateY(90deg) scale(.8);opacity:0}100%{transform:rotateY(0deg) scale(1);opacity:1}}
+.flip-in{animation:card-flip .35s cubic-bezier(.34,1.56,.64,1) forwards}
+
+/* Pack result area */
+.pack-result{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius);padding:16px;margin-bottom:12px;text-align:center}
+.pack-result-headline{font-size:1.15rem;font-weight:800;margin-bottom:4px}
+.pack-result-sub{color:var(--text-dim);font-size:.85rem;margin-bottom:12px}
+.pack-value{font-size:1.4rem;font-weight:900;color:#6ee7b7;margin:4px 0}
+.pack-value-label{font-size:.72rem;color:var(--text-muted)}
+.finish-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* Loading */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px}
+.spinner{width:40px;height:40px;border:3px solid var(--surface3);border-top-color:var(--g1,#7c3aed);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--text-dim);font-size:.9rem}
+.error-msg{color:#f87171;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:var(--radius-sm);padding:12px 16px;font-size:.85rem;text-align:center;max-width:360px}
+
+/* ── COLLECTION SCREEN ────────────────────────────────────────── */
+#s-collection{padding-top:16px}
+.coll-header{width:100%;max-width:900px;display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.coll-stats{width:100%;max-width:900px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius-sm);padding:14px;text-align:center}
+.stat-val{font-size:1.5rem;font-weight:900;margin-bottom:2px}
+.stat-label{color:var(--text-dim);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase}
+.coll-filters{width:100%;max-width:900px}
+.coll-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;width:100%;max-width:900px}
+.sort-select{background:var(--surface2);color:var(--text);border:1px solid var(--surface3);border-radius:var(--radius-sm);padding:8px 12px;font-size:.82rem;cursor:pointer;appearance:none}
+.search-input{background:var(--surface2);color:var(--text);border:1px solid var(--surface3);border-radius:var(--radius-sm);padding:8px 12px;font-size:.82rem;flex:1;min-width:140px;outline:none}
+.search-input:focus{border-color:var(--g1,#7c3aed)}
+.set-progress-list{width:100%;max-width:900px;margin-bottom:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.set-progress-item{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius-sm);padding:10px 12px}
+.sp-name{font-size:.82rem;font-weight:700;margin-bottom:4px;display:flex;justify-content:space-between}
+.sp-bar{height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-bottom:2px}
+.sp-fill{height:100%;background:linear-gradient(90deg,var(--g1,#7c3aed),var(--g2,#a855f7));border-radius:99px;transition:width .5s ease}
+.sp-count{font-size:.68rem;color:var(--text-muted)}
+.coll-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;width:100%;max-width:900px}
+@media(max-width:480px){.coll-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}}
+.coll-card{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius-sm);overflow:hidden;position:relative;transition:transform .2s,box-shadow .2s}
+.coll-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.coll-card-img{aspect-ratio:.72;background:#111;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.coll-card-img img{width:100%;height:100%;object-fit:cover}
+.coll-card-img .fallback{font-size:2rem}
+.coll-card-info{padding:6px 8px}
+.coll-card-name{font-size:.7rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.coll-card-row{display:flex;justify-content:space-between;align-items:center}
+.coll-card-price{font-size:.65rem;font-weight:700;color:#6ee7b7}
+.coll-count-badge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.8);color:#fff;font-size:.65rem;font-weight:800;padding:2px 7px;border-radius:99px;border:1px solid rgba(255,255,255,.15)}
+.empty-state{color:var(--text-dim);text-align:center;padding:48px 24px;font-size:.9rem}
+.empty-icon{font-size:3rem;margin-bottom:12px}
+
+/* ── RESPONSIVE ───────────────────────────────────────────────── */
+@media(max-width:600px){
+  .home-title{font-size:1.6rem}
+  .game-grid{grid-template-columns:1fr}
+  .game-card{padding:18px}
+  #pack-wrap{width:min(200px,56vw)}
+  .pack-art-logo{font-size:2rem}
+}
+@media(max-width:400px){
+  .coll-stats{grid-template-columns:1fr 1fr}
+  .stat-val{font-size:1.2rem}
+}
+
+/* ── CONFETTI PARTICLES ───────────────────────────────────────── */
+.particle{position:fixed;pointer-events:none;border-radius:2px;z-index:999;animation:particle-fall linear forwards}
+@keyframes particle-fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+/* ── TOAST ────────────────────────────────────────────────────── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface2);border:1px solid var(--surface3);color:var(--text);padding:10px 20px;border-radius:99px;font-size:.85rem;font-weight:600;z-index:1000;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
-<body>
+<body class="theme-home">
 
-<div id="idle-screen">
-  <div style="font-size:4.5rem;margin-bottom:12px">🎴</div>
-  <h1>Pokémon Pack Opener</h1>
-  <div class="subtitle">Base Set · Jungle · Fossil</div>
-  <div style="margin-bottom:24px;color:#888;font-size:.85rem">Type <span class="trigger">RIP!</span> to tear one open</div>
-  <button class="btn btn-primary" onclick="startOpen()">🎰 Rip a Pack!</button>
+<!-- ── TOAST ─────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  SCREEN 1 · HOME                                   -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="s-home" class="screen">
+  <div class="home-logo">🃏</div>
+  <h1 class="home-title">Card Pack Opener</h1>
+  <p class="home-sub">Open packs · Collect cards · Track your collection</p>
+
+  <div class="game-grid">
+    <div class="game-card gc-pokemon" onclick="selectGame('pokemon')">
+      <span class="game-icon">🔴</span>
+      <div class="game-name">Pokémon TCG</div>
+      <div class="game-desc">Classic Base Set, Jungle &amp; Fossil — open packs and find rare holos.</div>
+    </div>
+    <div class="game-card gc-mtg" onclick="selectGame('mtg')">
+      <span class="game-icon">♦️</span>
+      <div class="game-name">Magic: The Gathering</div>
+      <div class="game-desc">Alpha, Beta, Revised &amp; Ice Age — hunt for rare spells and dual lands.</div>
+    </div>
+    <div class="game-card gc-ygo" onclick="selectGame('ygo')">
+      <span class="game-icon">⚡</span>
+      <div class="game-name">Yu-Gi-Oh!</div>
+      <div class="game-desc">Legend of Blue Eyes, Metal Raiders &amp; more — duel your way to ultra rares.</div>
+    </div>
+  </div>
+
+  <button class="collection-link" onclick="showCollection()">📦 View My Collection</button>
+  <div style="margin-top:24px;color:var(--text-muted);font-size:.72rem;text-align:center;line-height:1.8">
+    Card data &amp; prices via
+    <a href="https://pokemontcg.io" target="_blank" rel="noopener" style="color:var(--text-dim)">Pokémon TCG API</a> ·
+    <a href="https://scryfall.com" target="_blank" rel="noopener" style="color:var(--text-dim)">Scryfall</a> ·
+    <a href="https://ygoprodeck.com/api-guide/" target="_blank" rel="noopener" style="color:var(--text-dim)">YGOPRODeck</a>
+  </div>
 </div>
 
-<div id="pack-screen" style="display:none">
-  <div class="set-badge" id="set-label"></div>
-  <div class="order-hint">
-    <span style="color:#fde047">✨ Rare</span>→
-    <span style="color:#60a5fa">💠 ×3 Uncommon</span>→
-    <span style="color:#d1d5db">⚪ ×5 Common</span>→
-    <span style="color:#6ee7b7">🔋 Energy</span>
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  SCREEN 2 · SET SELECT                             -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="s-sets" class="screen hidden">
+  <div class="screen-header">
+    <button class="back-btn" onclick="goHome()">← Back</button>
+    <div class="screen-header-title" id="game-title"></div>
   </div>
-  <div class="counter" id="counter">0/10 revealed</div>
-  <div id="grid"></div>
-  <div id="result-area" style="display:none">
-    <div class="result-msg" id="result-msg"></div>
-    <div class="result-sub" id="result-sub"></div>
+  <div class="section-title">Choose a set</div>
+  <div id="set-list" class="set-grid"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  SCREEN 3 · PACK OPEN                              -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="s-pack" class="screen hidden">
+  <div class="pack-header">
+    <button class="back-btn" onclick="goHome()">← Back</button>
+    <div class="pack-set-label" id="pack-label"></div>
   </div>
-  <div class="actions">
-    <button class="btn btn-secondary" onclick="revealNext()" id="btn-next">Reveal Next →</button>
-    <button class="btn btn-secondary" onclick="revealAll()" id="btn-all">Reveal All</button>
-    <button class="btn btn-primary" onclick="startOpen()" id="btn-another" style="display:none">🎰 Rip Another</button>
-    <button class="btn btn-secondary" onclick="goIdle()" id="btn-back" style="display:none">Back</button>
+
+  <!-- Loading state -->
+  <div id="pack-loading" class="loading-wrap">
+    <div class="spinner"></div>
+    <div class="loading-text">Shuffling cards…</div>
   </div>
+
+  <!-- Error state -->
+  <div id="pack-error" class="hidden">
+    <div class="error-msg" id="pack-error-msg"></div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="retryFetch()">Try again</button>
+  </div>
+
+  <!-- Pack stage -->
+  <div id="pack-stage" class="pack-stage hidden">
+    <div id="pack-wrap">
+      <div class="pack-body" id="pack-body">
+        <div class="pack-flap" id="pack-flap">
+          <div class="pack-flap-inner">✂ Swipe to open ✂</div>
+          <div class="tear-line"></div>
+          <div class="tear-progress" id="tear-bar" style="width:0%"></div>
+          <div class="scissors" id="scissors">✂</div>
+        </div>
+        <div class="pack-art" id="pack-art">
+          <div class="pack-art-shine"></div>
+          <div class="pack-art-logo" id="art-logo"></div>
+          <div class="pack-art-name" id="art-name"></div>
+          <div class="pack-art-set" id="art-set"></div>
+          <div class="pack-seal">Official Licensed Product</div>
+        </div>
+      </div>
+      <!-- Invisible swipe capture zone -->
+      <div id="swipe-zone"></div>
+    </div>
+    <div class="swipe-hint" id="swipe-hint">
+      <span class="swipe-arrow">←</span> Swipe to tear open <span class="swipe-arrow">→</span>
+    </div>
+  </div>
+
+  <!-- Cards area (shown after pack opens) -->
+  <div id="cards-area" class="hidden">
+    <div class="cards-top">
+      <div class="reveal-counter" id="reveal-counter">0/0 revealed</div>
+      <div class="reveal-actions">
+        <button class="btn btn-ghost btn-sm" id="btn-next" onclick="revealNext()">Reveal Next</button>
+        <button class="btn btn-ghost btn-sm" id="btn-all" onclick="revealAll()">Reveal All</button>
+      </div>
+    </div>
+    <div id="cards-grid"></div>
+
+    <div id="pack-result" class="pack-result hidden">
+      <div class="pack-result-headline" id="result-headline"></div>
+      <div class="pack-result-sub" id="result-sub"></div>
+      <div class="pack-value" id="result-value"></div>
+      <div class="pack-value-label">estimated pack value</div>
+      <div class="finish-actions" style="margin-top:16px">
+        <button class="btn btn-primary" onclick="openAnother()">🎴 Open Another</button>
+        <button class="btn btn-ghost" onclick="goHome()">Home</button>
+        <button class="btn btn-ghost" onclick="showCollection()">View Collection</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  SCREEN 4 · COLLECTION                             -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="s-collection" class="screen hidden">
+  <div class="coll-header">
+    <button class="back-btn" onclick="goHome()">← Back</button>
+    <div class="screen-header-title">My Collection</div>
+  </div>
+
+  <div class="coll-stats" id="coll-stats"></div>
+
+  <div class="coll-filters">
+    <div class="pill-tabs" id="coll-game-tabs"></div>
+  </div>
+
+  <div class="set-progress-list" id="set-progress-list"></div>
+
+  <div class="section-title" style="width:100%;max-width:900px">Cards</div>
+  <div class="coll-controls">
+    <input class="search-input" id="coll-search" type="search" placeholder="Search cards…" oninput="renderCollection()"/>
+    <select class="sort-select" id="coll-sort" onchange="renderCollection()">
+      <option value="recent">Recently Added</option>
+      <option value="name">Name A–Z</option>
+      <option value="price-desc">Highest Value</option>
+      <option value="price-asc">Lowest Value</option>
+      <option value="rarity">Rarity</option>
+    </select>
+  </div>
+  <div id="coll-grid" class="coll-grid"></div>
 </div>
 
 <script>
-// ── Card data ────────────────────────────────────────────────────────────────
-const DB = {
-  "Alakazam":"base1-1","Blastoise":"base1-2","Chansey":"base1-3","Charizard":"base1-4",
-  "Clefairy":"base1-5","Gyarados":"base1-6","Hitmonchan":"base1-7","Machamp":"base1-8",
-  "Magneton":"base1-9","Mewtwo":"base1-10","Nidoking":"base1-11","Ninetales":"base1-12",
-  "Poliwrath":"base1-13","Raichu":"base1-14","Venusaur":"base1-15","Zapdos":"base1-16",
-  "Beedrill":"base1-17","Dragonair":"base1-18","Dewgong":"base1-19","Dugtrio":"base1-20",
-  "Electrode":"base1-21","Pidgeot":"base1-22","Arcanine":"base1-23","Charmeleon":"base1-24",
-  "Clefable":"base1-25","Haunter":"base1-29","Ivysaur":"base1-30","Jynx":"base1-31",
-  "Kadabra":"base1-32","Lickitung":"base1-33","Machoke":"base1-34","Magikarp":"base1-35",
-  "Magmar":"base1-36","Nidoqueen":"base1-37","Poliwhirl":"base1-38","Porygon":"base1-39",
-  "Rhydon":"base1-40","Snorlax":"base1-41","Wartortle":"base1-42","Weepinbell":"base1-43",
-  "Bulbasaur":"base1-44","Caterpie":"base1-45","Charmander":"base1-46","Diglett":"base1-47",
-  "Doduo":"base1-48","Drowzee":"base1-49","Gastly":"base1-50","Koffing":"base1-51",
-  "Machop":"base1-52","Magnemite":"base1-53","Metapod":"base1-54","Onix":"base1-56",
-  "Pidgey":"base1-57","Pikachu":"base1-58","Poliwag":"base1-59","Ponyta":"base1-60",
-  "Rattata":"base1-61","Sandshrew":"base1-62","Seel":"base1-63","Squirtle":"base1-64",
-  "Staryu":"base1-65","Tentacool":"base1-66","Venonat":"base1-67","Voltorb":"base1-68",
-  "Weedle":"base1-69","Zubat":"base1-70",
-  "Computer Search":"base1-71","Devolution Spray":"base1-72","Item Finder":"base1-74",
-  "Lass":"base1-75","Pokemon Breeder":"base1-76","Pokemon Trader":"base1-77",
-  "Scoop Up":"base1-78","Super Energy Removal":"base1-79","Defender":"base1-80",
-  "Energy Retrieval":"base1-81","Full Heal":"base1-82","Maintenance":"base1-83",
-  "PlusPower":"base1-84","Pokedex":"base1-87","Professor Oak":"base1-88",
-  "Revive":"base1-89","Super Potion":"base1-90",
-  "Fire Energy":"base1-98","Fighting Energy":"base1-97","Grass Energy":"base1-99",
-  "Lightning Energy":"base1-100","Psychic Energy":"base1-101","Water Energy":"base1-102",
-  // Jungle
-  "Clefable (J)":"jungle-1","Electrode (J)":"jungle-2","Flareon":"jungle-3","Jolteon":"jungle-4",
-  "Kangaskhan":"jungle-5","Mr. Mime":"jungle-6","Nidoqueen (J)":"jungle-7","Pidgeot (J)":"jungle-8",
-  "Pinsir":"jungle-9","Scyther":"jungle-10","Snorlax (J)":"jungle-11","Vaporeon":"jungle-12",
-  "Venomoth":"jungle-13","Victreebel":"jungle-14","Vileplume":"jungle-15","Wigglytuff":"jungle-16",
-  "Butterfree":"jungle-17","Dodrio":"jungle-20","Exeggutor":"jungle-22","Marowak":"jungle-26",
-  "Nidorina":"jungle-25","Parasect":"jungle-27","Persian":"jungle-28","Primeape":"jungle-43",
-  "Rapidash":"jungle-44","Seaking":"jungle-46","Tauros":"jungle-47",
-  "Bellsprout":"jungle-49","Cubone":"jungle-50","Exeggcute":"jungle-52","Goldeen":"jungle-53",
-  "Jigglypuff":"jungle-54","Mankey":"jungle-55","Meowth":"jungle-56","Oddish":"jungle-58",
-  "Paras":"jungle-59","Pikachu (J)":"jungle-60","Rhyhorn":"jungle-61","Spearow":"jungle-62",
-  "Weepinbell (J)":"jungle-63",
-  // Fossil
-  "Aerodactyl":"fossil-1","Articuno":"fossil-2","Ditto":"fossil-3","Dragonite":"fossil-4",
-  "Gengar":"fossil-5","Hitmonlee":"fossil-6","Hypno":"fossil-8","Kabutops":"fossil-9",
-  "Lapras":"fossil-10","Moltres":"fossil-12","Muk":"fossil-13","Slowbro":"fossil-14",
-  "Haunter (F)":"fossil-7","Magneton (F)":"fossil-11","Raichu (F)":"fossil-14","Zapdos (F)":"fossil-15",
-  "Arbok":"fossil-31","Cloyster":"fossil-32","Golbat":"fossil-33","Graveler":"fossil-34",
-  "Kingler":"fossil-35","Omastar":"fossil-36","Sandslash":"fossil-37","Seadra":"fossil-38",
-  "Slowpoke":"fossil-39","Tentacruel":"fossil-40","Weezing":"fossil-41","Mysterious Fossil":"fossil-62",
-  "Ekans":"fossil-46","Geodude":"fossil-47","Grimer":"fossil-48","Horsea":"fossil-49",
-  "Kabuto":"fossil-50","Krabby":"fossil-51","Omanyte":"fossil-52","Psyduck":"fossil-53",
-  "Shellder":"fossil-54","Slowpoke (F)":"fossil-55",
-};
-
-const SETS = {
-  "Base Set":{
-    bg:"bg-base",year:"1999",symbol:"🔵",
-    holos:["Alakazam","Blastoise","Chansey","Charizard","Clefairy","Gyarados","Hitmonchan","Machamp","Magneton","Mewtwo","Nidoking","Ninetales","Poliwrath","Raichu","Venusaur","Zapdos"],
-    rares:["Beedrill","Dragonair","Dewgong","Dugtrio","Electrode","Pidgeot","Arcanine","Charmeleon","Clefable","Haunter","Ivysaur","Jynx","Kadabra","Lickitung","Machoke","Magikarp","Magmar","Nidoqueen","Poliwhirl","Porygon","Rhydon","Snorlax","Wartortle","Weepinbell"],
-    uncommons:["Computer Search","Devolution Spray","Item Finder","Lass","Pokemon Breeder","Pokemon Trader","Scoop Up","Super Energy Removal","Defender","Energy Retrieval","Full Heal","Maintenance","PlusPower","Pokedex","Professor Oak","Revive","Super Potion"],
-    commons:["Bulbasaur","Caterpie","Charmander","Diglett","Doduo","Drowzee","Gastly","Koffing","Machop","Magnemite","Metapod","Onix","Pidgey","Pikachu","Poliwag","Ponyta","Rattata","Sandshrew","Seel","Squirtle","Staryu","Tentacool","Venonat","Voltorb","Weedle","Zubat"],
-    energies:["Fire Energy","Fighting Energy","Grass Energy","Lightning Energy","Psychic Energy","Water Energy"],
-  },
-  "Jungle":{
-    bg:"bg-jungle",year:"1999",symbol:"🟢",
-    holos:["Clefable (J)","Electrode (J)","Flareon","Jolteon","Kangaskhan","Mr. Mime","Nidoqueen (J)","Pidgeot (J)","Pinsir","Scyther","Snorlax (J)","Vaporeon","Venomoth","Victreebel","Vileplume","Wigglytuff"],
-    rares:["Butterfree","Dodrio","Exeggutor","Marowak","Nidorina","Parasect","Persian","Primeape","Rapidash","Seaking","Tauros"],
-    uncommons:["Butterfree","Dodrio","Exeggutor","Marowak","Nidorina","Parasect","Persian","Primeape","Rapidash","Seaking","Tauros"],
-    commons:["Bellsprout","Cubone","Exeggcute","Goldeen","Jigglypuff","Mankey","Meowth","Oddish","Paras","Pikachu (J)","Rhyhorn","Spearow","Weepinbell (J)"],
-    energies:["Grass Energy","Fire Energy","Water Energy","Lightning Energy","Fighting Energy","Psychic Energy"],
-  },
-  "Fossil":{
-    bg:"bg-fossil",year:"1999",symbol:"🟤",
-    holos:["Aerodactyl","Articuno","Ditto","Dragonite","Gengar","Hitmonlee","Hypno","Kabutops","Lapras","Moltres","Muk","Slowbro"],
-    rares:["Haunter (F)","Magneton (F)","Raichu (F)","Zapdos (F)","Aerodactyl","Articuno","Ditto","Dragonite","Gengar","Hitmonlee","Hypno","Kabutops","Lapras","Moltres","Muk","Slowbro"],
-    uncommons:["Arbok","Cloyster","Golbat","Graveler","Kingler","Omastar","Sandslash","Seadra","Slowpoke","Tentacruel","Weezing","Mysterious Fossil"],
-    commons:["Ekans","Geodude","Grimer","Horsea","Kabuto","Krabby","Omanyte","Psyduck","Shellder","Slowpoke (F)"],
-    energies:["Water Energy","Fighting Energy","Psychic Energy","Fire Energy","Lightning Energy","Grass Energy"],
-  }
-};
-
-const RARITY_CLS = {"Holo Rare":"r-holo","Rare":"r-rare","Uncommon":"r-uncommon","Common":"r-common","Energy":"r-energy"};
-const BADGE_CLS  = {"Holo Rare":"b-holo","Rare":"b-rare","Uncommon":"b-uncommon","Common":"b-common","Energy":"b-energy"};
-const FALLBACK   = {"Holo Rare":"✨","Rare":"⭐","Uncommon":"💠","Common":"⚪","Energy":"⚡"};
-
-let cards=[], revealed=0, currentSet=null;
-
-function pick(a){return a[Math.floor(Math.random()*a.length)];}
-
-function imgUrl(id){
-  const [s,n]=id.split('-');
-  return `https://images.pokemontcg.io/${s}/${n}_hires.png`;
-}
-
-function makePack(sName){
-  const S=SETS[sName], out=[];
-  // Rare slot
-  const isHolo = Math.random()<0.333;
-  const name0 = isHolo ? pick(S.holos) : pick(S.rares);
-  out.push({name:name0, rarity:isHolo?'Holo Rare':'Rare', id:DB[name0]||null});
-  for(let i=0;i<3;i++){const n=pick(S.uncommons);out.push({name:n,rarity:'Uncommon',id:DB[n]||null});}
-  for(let i=0;i<5;i++){const n=pick(S.commons);  out.push({name:n,rarity:'Common',  id:DB[n]||null});}
-  const en=pick(S.energies); out.push({name:en,rarity:'Energy',id:DB[en]||null});
-  return out;
-}
-
-function renderGrid(){
-  const grid=document.getElementById('grid');
-  grid.innerHTML='';
-  cards.forEach((card,i)=>{
-    const wrap=document.createElement('div');
-    wrap.className='card-wrap';
-    wrap.id=`card-${i}`;
-    if(i<revealed){
-      revealCard(wrap,card);
-    } else if(i===revealed){
-      wrap.classList.add('current');
-      wrap.innerHTML=`<div class="card-img-wrap"><span class="card-icon">🎴</span><span class="tap-hint">Tap to reveal</span></div>`;
-      wrap.onclick=()=>revealNext();
-    } else {
-      wrap.classList.add('face-down');
-      wrap.innerHTML=`<div class="card-img-wrap"></div>`;
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+//  GAME DEFINITIONS
+// ═══════════════════════════════════════════════════════════════
+const GAMES = {
+  pokemon: {
+    label: 'Pokémon TCG', icon: '🔴',
+    theme: 'theme-pokemon',
+    colors: { flap1:'#cc0000', flap2:'#ff6600', art1:'#1a0505', art2:'#3d0f0f' },
+    sets: [
+      { id:'base1',   name:'Base Set',  year:'1999', total:102, symbol:'🔵', packSize:10 },
+      { id:'jungle',  name:'Jungle',    year:'1999', total:64,  symbol:'🌿', packSize:10 },
+      { id:'fossil',  name:'Fossil',    year:'1999', total:62,  symbol:'🦴', packSize:10 },
+    ],
+    normalizeRarity(r='') {
+      r = r.toLowerCase();
+      if(r.includes('holo')) return 'Holo Rare';
+      if(r.includes('rare')) return 'Rare';
+      if(r.includes('uncommon')) return 'Uncommon';
+      if(r.includes('energy')) return 'Energy';
+      return 'Common';
+    },
+    rarityClass(r) {
+      const m = {'Holo Rare':'r-holo','Rare':'r-rare','Uncommon':'r-uncommon','Common':'r-common','Energy':'r-energy'};
+      return m[r] || 'r-common';
+    },
+    badgeClass(r) {
+      const m = {'Holo Rare':'b-holo','Rare':'b-rare','Uncommon':'b-uncommon','Common':'b-common','Energy':'b-energy'};
+      return m[r] || 'b-common';
+    },
+    rarityOrder: {'Holo Rare':0,'Rare':1,'Uncommon':2,'Common':3,'Energy':4},
+    async fetchPack(set) {
+      const res = await apiFetch(`https://api.pokemontcg.io/v2/cards?q=set.id:${set.id}&pageSize=250&orderBy=number`);
+      const all = res.data || [];
+      const byRarity = { holo:[], rare:[], uncommon:[], common:[], energy:[] };
+      all.forEach(c => {
+        const r = (c.rarity||'').toLowerCase();
+        const obj = { id:c.id, name:c.name, rarity:this.normalizeRarity(c.rarity),
+          image: c.images?.large || c.images?.small,
+          price: pokePrice(c), game:'pokemon', setId:set.id, setName:set.name,
+          setTotal: set.total, number: c.number };
+        if(r.includes('holo')) byRarity.holo.push(obj);
+        else if(r.includes('rare')) byRarity.rare.push(obj);
+        else if(r.includes('uncommon')) byRarity.uncommon.push(obj);
+        else if(r.includes('energy') || c.supertype==='Energy') byRarity.energy.push(obj);
+        else byRarity.common.push(obj);
+      });
+      const pack = [];
+      // 1 rare slot
+      if(Math.random()<0.333 && byRarity.holo.length)
+        pack.push({...pick(byRarity.holo), rarity:'Holo Rare'});
+      else if(byRarity.rare.length)
+        pack.push({...pick(byRarity.rare), rarity:'Rare'});
+      else if(byRarity.holo.length)
+        pack.push({...pick(byRarity.holo), rarity:'Holo Rare'});
+      // 3 uncommons
+      const uncommonPool = byRarity.uncommon.length ? byRarity.uncommon : byRarity.common;
+      for(let i=0;i<3;i++) pack.push({...pick(uncommonPool), rarity:'Uncommon'});
+      // 5 commons
+      const commonPool = byRarity.common.length ? byRarity.common : uncommonPool;
+      for(let i=0;i<5;i++) pack.push({...pick(commonPool), rarity:'Common'});
+      // 1 energy
+      const energyPool = byRarity.energy.length ? byRarity.energy : commonPool;
+      pack.push({...pick(energyPool), rarity:'Energy'});
+      return pack;
     }
-    grid.appendChild(wrap);
+  },
+
+  mtg: {
+    label: 'Magic: The Gathering', icon: '♦️',
+    theme: 'theme-mtg',
+    colors: { flap1:'#1a5c2e', flap2:'#4a8c1e', art1:'#020e06', art2:'#0f2a10' },
+    sets: [
+      { id:'lea',  name:'Alpha',   year:'1993', total:295, symbol:'⭕', packSize:15 },
+      { id:'leb',  name:'Beta',    year:'1993', total:302, symbol:'🔲', packSize:15 },
+      { id:'3ed',  name:'Revised', year:'1994', total:306, symbol:'🌀', packSize:15 },
+      { id:'ice',  name:'Ice Age', year:'1995', total:383, symbol:'❄️', packSize:15 },
+    ],
+    normalizeRarity(r='') {
+      r = r.toLowerCase();
+      if(r==='mythic') return 'Mythic Rare';
+      if(r==='rare') return 'Rare';
+      if(r==='uncommon') return 'Uncommon';
+      if(r==='land'||r==='basic land') return 'Land';
+      return 'Common';
+    },
+    rarityClass(r) {
+      const m = {'Mythic Rare':'r-mythic','Rare':'r-rare','Uncommon':'r-uncommon','Common':'r-common','Land':'r-land'};
+      return m[r] || 'r-common';
+    },
+    badgeClass(r) {
+      const m = {'Mythic Rare':'b-mythic','Rare':'b-rare','Uncommon':'b-uncommon','Common':'b-common','Land':'b-land'};
+      return m[r] || 'b-common';
+    },
+    rarityOrder: {'Mythic Rare':0,'Rare':1,'Uncommon':2,'Common':3,'Land':4},
+    async fetchPack(set) {
+      // Fetch all cards for set from Scryfall (paginated)
+      let page = 1, hasMore = true, all = [];
+      while(hasMore && page <= 8) {
+        await delay(80);
+        const data = await apiFetch(`https://api.scryfall.com/cards/search?q=set:${set.id}&order=number&page=${page}`);
+        if(data.object === 'error' || !data.data) break;
+        all.push(...data.data);
+        hasMore = data.has_more;
+        page++;
+      }
+      const byRarity = { mythic:[], rare:[], uncommon:[], common:[], land:[] };
+      all.forEach(c => {
+        const obj = {
+          id: c.id, name: c.name, rarity: this.normalizeRarity(c.rarity),
+          image: c.image_uris?.normal || c.card_faces?.[0]?.image_uris?.normal,
+          price: parseFloat(c.prices?.usd || 0),
+          game: 'mtg', setId: set.id, setName: set.name, setTotal: set.total,
+          number: parseInt(c.collector_number) || 0
+        };
+        const r = c.rarity?.toLowerCase();
+        if(r==='mythic') byRarity.mythic.push(obj);
+        else if(r==='rare') byRarity.rare.push(obj);
+        else if(r==='uncommon') byRarity.uncommon.push(obj);
+        else if(r==='land') byRarity.land.push(obj);
+        else byRarity.common.push(obj);
+      });
+      const pack = [];
+      // 1 rare slot (1/8 mythic)
+      const rarePool = Math.random()<0.125 && byRarity.mythic.length ? byRarity.mythic
+                     : byRarity.rare.length ? byRarity.rare : byRarity.mythic;
+      if(rarePool.length) pack.push(pick(rarePool));
+      // 3 uncommons
+      const uPool = byRarity.uncommon.length ? byRarity.uncommon : byRarity.common;
+      for(let i=0;i<3;i++) pack.push({...pick(uPool), rarity:'Uncommon'});
+      // 10 commons
+      const cPool = byRarity.common.length ? byRarity.common : uPool;
+      for(let i=0;i<10;i++) pack.push({...pick(cPool), rarity:'Common'});
+      // 1 land
+      const lPool = byRarity.land.length ? byRarity.land : cPool;
+      pack.push({...pick(lPool), rarity:'Land'});
+      return pack;
+    }
+  },
+
+  ygo: {
+    label: 'Yu-Gi-Oh!', icon: '⚡',
+    theme: 'theme-ygo',
+    colors: { flap1:'#4a1090', flap2:'#8b0000', art1:'#080020', art2:'#1a0030' },
+    sets: [
+      { id:'Legend of Blue Eyes White Dragon', name:'Legend of Blue Eyes', year:'2002', total:126, symbol:'🐉', packSize:9 },
+      { id:'Metal Raiders',    name:'Metal Raiders',     year:'2002', total:144, symbol:'⚙️', packSize:9 },
+      { id:'Magic Ruler',      name:'Magic Ruler',       year:'2002', total:116, symbol:'📜', packSize:9 },
+      { id:"Pharaoh's Servant",name:"Pharaoh's Servant", year:'2002', total:105, symbol:'👁️', packSize:9 },
+      { id:'Dark Crisis',      name:'Dark Crisis',       year:'2003', total:108, symbol:'🌑', packSize:9 },
+      { id:'Invasion of Chaos',name:'Invasion of Chaos', year:'2004', total:115, symbol:'🌀', packSize:9 },
+    ],
+    normalizeRarity(r='') {
+      r = r.toLowerCase();
+      if(r.includes('secret')) return 'Secret Rare';
+      if(r.includes('ultra')) return 'Ultra Rare';
+      if(r.includes('super')) return 'Super Rare';
+      if(r.includes('rare')) return 'Rare';
+      return 'Common';
+    },
+    rarityClass(r) {
+      const m = {'Secret Rare':'r-secret','Ultra Rare':'r-ultra','Super Rare':'r-super','Rare':'r-rare','Common':'r-common'};
+      return m[r] || 'r-common';
+    },
+    badgeClass(r) {
+      const m = {'Secret Rare':'b-secret','Ultra Rare':'b-ultra','Super Rare':'b-super','Rare':'b-rare','Common':'b-common'};
+      return m[r] || 'b-common';
+    },
+    rarityOrder: {'Secret Rare':0,'Ultra Rare':1,'Super Rare':2,'Rare':3,'Common':4},
+    async fetchPack(set) {
+      const data = await apiFetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?cardset=${encodeURIComponent(set.id)}`);
+      const all = data.data || [];
+      const byRarity = { secret:[], ultra:[], super:[], rare:[], common:[] };
+      all.forEach(c => {
+        const setInfo = (c.card_sets||[]).find(s => s.set_name === set.id) || (c.card_sets||[])[0] || {};
+        const r = this.normalizeRarity(setInfo.set_rarity || '');
+        // Use set-specific price (per printing) or fall back to TCGPlayer market price
+        const setPrice = parseFloat(setInfo.set_price || 0);
+        const tcgPrice = parseFloat(c.card_prices?.[0]?.tcgplayer_price || 0);
+        const obj = {
+          id: String(c.id), name: c.name, rarity: r,
+          image: c.card_images?.[0]?.image_url,
+          price: setPrice || tcgPrice,
+          game: 'ygo', setId: set.id, setName: set.name, setTotal: set.total
+        };
+        if(r==='Secret Rare') byRarity.secret.push(obj);
+        else if(r==='Ultra Rare') byRarity.ultra.push(obj);
+        else if(r==='Super Rare') byRarity.super.push(obj);
+        else if(r==='Rare') byRarity.rare.push(obj);
+        else byRarity.common.push(obj);
+      });
+      const pack = [];
+      // 1 top slot (5% secret, 20% ultra, 30% super, 45% rare)
+      const roll = Math.random();
+      const topPool = roll<0.05 && byRarity.secret.length ? byRarity.secret
+                    : roll<0.25 && byRarity.ultra.length  ? byRarity.ultra
+                    : roll<0.55 && byRarity.super.length  ? byRarity.super
+                    : byRarity.rare.length ? byRarity.rare : byRarity.common;
+      if(topPool.length) pack.push(pick(topPool));
+      // 2 super/rare
+      const midPool = byRarity.super.length ? byRarity.super : byRarity.rare.length ? byRarity.rare : byRarity.common;
+      for(let i=0;i<2;i++) pack.push({...pick(midPool)});
+      // 6 common
+      const cPool = byRarity.common.length ? byRarity.common : midPool;
+      for(let i=0;i<6;i++) pack.push({...pick(cPool)});
+      return pack;
+    }
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let activeGame = null;
+let activeSet = null;
+let packCards = [];
+let revealed = 0;
+let packSize = 10;
+const cardCache = {};
+
+// ═══════════════════════════════════════════════════════════════
+//  COLLECTION (localStorage)
+// ═══════════════════════════════════════════════════════════════
+function loadCollection() {
+  try { return JSON.parse(localStorage.getItem('cpo_collection') || '{}'); } catch{ return {}; }
+}
+function saveCollection(col) {
+  localStorage.setItem('cpo_collection', JSON.stringify(col));
+}
+function addCardsToCollection(cards) {
+  const col = loadCollection();
+  cards.forEach(card => {
+    if(!col[card.id]) col[card.id] = { card, count:0, addedAt: Date.now() };
+    col[card.id].count++;
+    col[card.id].card = card; // keep latest data
   });
+  saveCollection(col);
 }
 
-function revealCard(wrap, card){
-  wrap.className=`card-wrap ${RARITY_CLS[card.rarity]}`;
-  wrap.onclick=null;
-  const imgId=DB[card.name];
-  let imgHtml='';
-  if(imgId){
-    const url=imgUrl(imgId);
-    imgHtml=`<img src="${url}" alt="${card.name}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
-             <span class="fallback" style="display:none">${FALLBACK[card.rarity]}</span>`;
-  } else {
-    imgHtml=`<span class="fallback">${FALLBACK[card.rarity]}</span>`;
+// ═══════════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════════
+function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+function pokePrice(c) {
+  const p = c.tcgplayer?.prices;
+  if(!p) return 0;
+  return p.holofoil?.market || p['1stEditionHolofoil']?.market ||
+         p.reverseHolofoil?.market || p.normal?.market || 0;
+}
+
+async function apiFetch(url) {
+  const cached = cardCache[url];
+  if(cached) return cached;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error(`API error ${res.status}`);
+  const data = await res.json();
+  cardCache[url] = data;
+  return data;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SCREEN NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+const SCREENS = ['s-home','s-sets','s-pack','s-collection'];
+function showScreen(id) {
+  SCREENS.forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
+  window.scrollTo(0,0);
+}
+
+function goHome() {
+  document.body.className = 'theme-home';
+  showScreen('s-home');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  HOME → GAME SELECT
+// ═══════════════════════════════════════════════════════════════
+function selectGame(gameId) {
+  activeGame = gameId;
+  const G = GAMES[gameId];
+  document.body.className = G.theme;
+  document.getElementById('game-title').textContent = G.label;
+
+  const col = loadCollection();
+  const list = document.getElementById('set-list');
+  list.innerHTML = G.sets.map(s => {
+    const ownedCount = Object.values(col).filter(e => e.card.game===gameId && e.card.setId===s.id).length;
+    const pct = Math.round(ownedCount/s.total*100);
+    return `<div class="set-card" onclick="selectSet('${gameId}','${s.id}')">
+      <div class="set-total">${s.total} cards</div>
+      <div class="set-symbol">${s.symbol}</div>
+      <div class="set-name">${s.name}</div>
+      <div class="set-meta">${s.year} · ${s.packSize}-card packs</div>
+      <div class="set-owned" style="color:${ownedCount>0?'#6ee7b7':'var(--text-muted)'}">
+        ${ownedCount>0?`${ownedCount}/${s.total} owned (${pct}%)`:'Not started'}
+      </div>
+    </div>`;
+  }).join('');
+  showScreen('s-sets');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SET → FETCH & OPEN PACK
+// ═══════════════════════════════════════════════════════════════
+async function selectSet(gameId, setId) {
+  const G = GAMES[gameId];
+  const S = G.sets.find(s => s.id === setId);
+  activeSet = S;
+  packCards = [];
+  revealed = 0;
+  packSize = S.packSize;
+
+  document.getElementById('pack-label').textContent = `${S.symbol} ${G.label} — ${S.name} (${S.year})`;
+
+  // Style pack visuals
+  const flap = document.getElementById('pack-flap');
+  flap.style.setProperty('--flap-bg', `linear-gradient(135deg,${G.colors.flap1},${G.colors.flap2})`);
+  flap.style.background = `linear-gradient(135deg,${G.colors.flap1},${G.colors.flap2})`;
+  const art = document.getElementById('pack-art');
+  art.style.background = `linear-gradient(160deg,${G.colors.art1},${G.colors.art2})`;
+  document.getElementById('art-logo').textContent = S.symbol;
+  document.getElementById('art-name').textContent = G.label;
+  document.getElementById('art-set').textContent = S.name + ' · ' + S.year;
+
+  // Reset pack visuals
+  flap.classList.remove('opened');
+  document.getElementById('tear-bar').style.width = '0%';
+  document.getElementById('scissors').style.setProperty('--tear-pct','0%');
+
+  showScreen('s-pack');
+  document.getElementById('pack-loading').classList.remove('hidden');
+  document.getElementById('pack-stage').classList.add('hidden');
+  document.getElementById('pack-error').classList.add('hidden');
+  document.getElementById('cards-area').classList.add('hidden');
+  document.getElementById('pack-result').classList.add('hidden');
+  document.getElementById('swipe-hint').classList.remove('hidden');
+
+  try {
+    packCards = await G.fetchPack(S);
+    document.getElementById('pack-loading').classList.add('hidden');
+    document.getElementById('pack-stage').classList.remove('hidden');
+    initSwipe();
+  } catch(e) {
+    document.getElementById('pack-loading').classList.add('hidden');
+    document.getElementById('pack-error').classList.remove('hidden');
+    document.getElementById('pack-error-msg').textContent = `Failed to load cards: ${e.message}. Check your connection.`;
   }
-  wrap.innerHTML=`
-    ${card.rarity==='Holo Rare'?'<div class="holo-overlay"></div>':''}
-    <div class="card-img-wrap">${imgHtml}</div>
-    <div class="card-info">
-      <div class="card-name" title="${card.name}">${card.name}</div>
-      <span class="badge ${BADGE_CLS[card.rarity]}">${card.rarity}</span>
+}
+
+function retryFetch() {
+  if(activeGame && activeSet) selectSet(activeGame, activeSet.id);
+}
+function openAnother() {
+  if(activeGame && activeSet) selectSet(activeGame, activeSet.id);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SWIPE / UNZIP ANIMATION
+// ═══════════════════════════════════════════════════════════════
+let swipeActive = false, swipeStartX = 0, swipeCurrent = 0, packOpened = false;
+
+function initSwipe() {
+  packOpened = false;
+  const zone = document.getElementById('swipe-zone');
+  zone.onmousedown = startSwipe;
+  zone.ontouchstart = startSwipe;
+  document.onmousemove = moveSwipe;
+  document.ontouchmove = moveSwipe;
+  document.onmouseup = endSwipe;
+  document.ontouchend = endSwipe;
+}
+
+function startSwipe(e) {
+  if(packOpened) return;
+  swipeActive = true;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  swipeStartX = clientX;
+  swipeCurrent = 0;
+  document.getElementById('swipe-hint').classList.add('hidden');
+}
+
+function moveSwipe(e) {
+  if(!swipeActive || packOpened) return;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const dx = clientX - swipeStartX;
+  const packW = document.getElementById('pack-wrap').offsetWidth;
+  swipeCurrent = Math.max(0, Math.min(100, (Math.abs(dx) / packW) * 130));
+  updateTear(swipeCurrent);
+  if(swipeCurrent >= 100) {
+    swipeActive = false;
+    triggerPackOpen();
+  }
+}
+
+function endSwipe() {
+  if(!swipeActive) return;
+  swipeActive = false;
+  if(swipeCurrent < 100) {
+    // Snap back
+    const anim = setInterval(() => {
+      swipeCurrent = Math.max(0, swipeCurrent - 8);
+      updateTear(swipeCurrent);
+      if(swipeCurrent <= 0) clearInterval(anim);
+    }, 20);
+    document.getElementById('swipe-hint').classList.remove('hidden');
+  }
+}
+
+function updateTear(pct) {
+  document.getElementById('tear-bar').style.width = pct + '%';
+  document.getElementById('scissors').style.setProperty('--tear-pct', pct + '%');
+  document.getElementById('scissors').style.right = `calc(${100-pct}% - 16px)`;
+  // Shake the pack slightly as tear progresses
+  const pack = document.getElementById('pack-body');
+  if(pct > 20 && pct < 95) {
+    const shake = Math.sin(pct * 0.5) * 2;
+    pack.style.transform = `rotate(${shake}deg)`;
+  } else {
+    pack.style.transform = '';
+  }
+}
+
+async function triggerPackOpen() {
+  if(packOpened) return;
+  packOpened = true;
+
+  // Complete the tear
+  updateTear(100);
+  await delay(80);
+
+  // Flap fold animation
+  const flap = document.getElementById('pack-flap');
+  flap.classList.add('opened');
+
+  // Pack body shake
+  const pack = document.getElementById('pack-body');
+  pack.classList.add('pack-shaking');
+  pack.style.transform = '';
+
+  await delay(500);
+  pack.classList.remove('pack-shaking');
+
+  // Confetti burst
+  spawnConfetti(20);
+
+  await delay(200);
+
+  // Transition to cards
+  document.getElementById('pack-stage').classList.add('hidden');
+  document.getElementById('cards-area').classList.remove('hidden');
+  revealed = 0;
+  renderCards();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CARD REVEAL
+// ═══════════════════════════════════════════════════════════════
+function renderCards() {
+  const grid = document.getElementById('cards-grid');
+  grid.innerHTML = '';
+  packCards.forEach((card, i) => {
+    const tile = makeTile(card, i);
+    grid.appendChild(tile);
+  });
+  updateCounter();
+}
+
+function makeTile(card, i) {
+  const G = GAMES[card.game];
+  const tile = document.createElement('div');
+  tile.className = 'c-tile';
+  tile.id = `tile-${i}`;
+
+  if(i < revealed) {
+    applyRevealedTile(tile, card, G);
+  } else if(i === revealed) {
+    tile.classList.add('current');
+    tile.innerHTML = `<div class="c-tile-img"><span class="card-icon">🎴</span><span class="tap-hint">Tap</span></div>`;
+    tile.onclick = () => revealNext();
+  } else {
+    tile.classList.add('face-down');
+    tile.innerHTML = `<div class="c-tile-img"></div>`;
+  }
+  return tile;
+}
+
+function applyRevealedTile(tile, card, G) {
+  tile.classList.remove('current','face-down');
+  tile.classList.add('revealed', G.rarityClass(card.rarity));
+  tile.onclick = null;
+
+  const isTop = card.rarity === 'Holo Rare' || card.rarity === 'Mythic Rare' || card.rarity === 'Secret Rare' || card.rarity === 'Ultra Rare';
+  const priceStr = card.price ? `$${card.price.toFixed(2)}` : '';
+
+  tile.innerHTML = `
+    ${isTop ? '<div class="holo-overlay"></div>' : ''}
+    <div class="c-tile-img">
+      ${card.image
+        ? `<img src="${card.image}" alt="${card.name}" loading="lazy" onerror="this.parentNode.innerHTML='<span class=c-tile-fallback>🃏</span>'">`
+        : `<span class="c-tile-fallback">🃏</span>`}
+    </div>
+    <div class="c-tile-info">
+      <div class="c-tile-name" title="${card.name}">${card.name}</div>
+      ${priceStr ? `<div class="c-tile-price">${priceStr}</div>` : ''}
     </div>`;
 }
 
-function updateCounter(){
-  document.getElementById('counter').textContent=`${revealed}/10 revealed`;
-}
+function revealNext() {
+  if(revealed >= packCards.length) return;
+  const tile = document.getElementById(`tile-${revealed}`);
+  const card = packCards[revealed];
+  const G = GAMES[card.game];
+  applyRevealedTile(tile, card, G);
+  tile.classList.add('flip-in');
+  tile.addEventListener('animationend', () => tile.classList.remove('flip-in'), {once:true});
 
-function revealNext(){
-  if(revealed>=10) return;
-  const wrap=document.getElementById(`card-${revealed}`);
-  revealCard(wrap, cards[revealed]);
+  // Highlight rarity on big reveal
+  if(card.rarity === 'Holo Rare' || card.rarity === 'Mythic Rare' || card.rarity === 'Secret Rare') {
+    spawnConfetti(12);
+    showToast(`✨ ${card.rarity} — ${card.name}!`);
+  } else if(card.rarity === 'Ultra Rare') {
+    spawnConfetti(8);
+    showToast(`⭐ ${card.rarity} — ${card.name}!`);
+  }
+
   revealed++;
   updateCounter();
-  // Advance "current" pointer
-  if(revealed<10){
-    const next=document.getElementById(`card-${revealed}`);
+
+  if(revealed < packCards.length) {
+    const next = document.getElementById(`tile-${revealed}`);
     next.classList.remove('face-down');
     next.classList.add('current');
-    next.innerHTML=`<div class="card-img-wrap"><span class="card-icon">🎴</span><span class="tap-hint">Tap to reveal</span></div>`;
-    next.onclick=()=>revealNext();
+    next.innerHTML = `<div class="c-tile-img"><span class="card-icon">🎴</span><span class="tap-hint">Tap</span></div>`;
+    next.onclick = () => revealNext();
+  } else {
+    finishPack();
   }
-  if(revealed===10) finishPack();
 }
 
-function revealAll(){
-  while(revealed<10) revealNext();
+function revealAll() {
+  while(revealed < packCards.length) revealNext();
 }
 
-function finishPack(){
-  document.getElementById('btn-next').style.display='none';
-  document.getElementById('btn-all').style.display='none';
-  document.getElementById('btn-another').style.display='inline-block';
-  document.getElementById('btn-back').style.display='inline-block';
-  const isHolo=cards[0].rarity==='Holo Rare';
-  const ra=document.getElementById('result-area');
-  ra.style.display='block';
-  document.getElementById('result-msg').textContent=isHolo?'✨ HOLO RARE! What a pull!':'No holo this time...';
-  document.getElementById('result-sub').textContent=isHolo?`You pulled a ${cards[0].name}!`:'Better luck next pack.';
+function updateCounter() {
+  document.getElementById('reveal-counter').textContent = `${revealed}/${packCards.length} revealed`;
+  const done = revealed >= packCards.length;
+  document.getElementById('btn-next').style.display = done ? 'none' : '';
+  document.getElementById('btn-all').style.display = done ? 'none' : '';
 }
 
-function startOpen(){
-  const keys=Object.keys(SETS);
-  const sName=keys[Math.floor(Math.random()*keys.length)];
-  currentSet=sName;
-  cards=makePack(sName);
-  revealed=0;
-  // Set background
-  document.body.className=SETS[sName].bg;
-  // Labels
-  document.getElementById('set-label').textContent=`${SETS[sName].symbol} Pokémon ${sName} (${SETS[sName].year})`;
-  // Buttons
-  document.getElementById('btn-next').style.display='inline-block';
-  document.getElementById('btn-all').style.display='inline-block';
-  document.getElementById('btn-another').style.display='none';
-  document.getElementById('btn-back').style.display='none';
-  document.getElementById('result-area').style.display='none';
-  updateCounter();
-  renderGrid();
-  document.getElementById('idle-screen').style.display='none';
-  document.getElementById('pack-screen').style.display='flex';
+function finishPack() {
+  // Save to collection
+  addCardsToCollection(packCards);
+
+  // Calculate total value
+  const total = packCards.reduce((s,c) => s + (c.price||0), 0);
+  const topCard = [...packCards].sort((a,b) => (b.price||0)-(a.price||0))[0];
+  const topRarity = packCards[0];
+
+  const isHolo = topRarity.rarity === 'Holo Rare' || topRarity.rarity === 'Mythic Rare'
+               || topRarity.rarity === 'Secret Rare' || topRarity.rarity === 'Ultra Rare';
+
+  document.getElementById('result-headline').textContent = isHolo
+    ? `✨ ${topRarity.rarity}! Amazing pull!` : 'Pack complete!';
+  document.getElementById('result-sub').textContent = isHolo
+    ? `You pulled ${topRarity.name}!` : topCard && topCard.price > 1
+    ? `Best pull: ${topCard.name} ($${topCard.price.toFixed(2)})`
+    : 'Cards added to your collection.';
+  document.getElementById('result-value').textContent = total > 0 ? `$${total.toFixed(2)}` : '—';
+  document.getElementById('pack-result').classList.remove('hidden');
+
+  if(isHolo) spawnConfetti(30);
 }
 
-function goIdle(){
-  document.body.className='';
-  document.getElementById('pack-screen').style.display='none';
-  document.getElementById('idle-screen').style.display='flex';
+// ═══════════════════════════════════════════════════════════════
+//  CONFETTI
+// ═══════════════════════════════════════════════════════════════
+function spawnConfetti(n) {
+  const colors = ['#f59e0b','#10b981','#3b82f6','#f87171','#a78bfa','#fde047'];
+  for(let i=0;i<n;i++) {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = 6 + Math.random()*8;
+      p.style.cssText = `
+        left:${10+Math.random()*80}%;
+        top:${-10+Math.random()*30}%;
+        width:${size}px; height:${size}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        animation-duration:${1.2+Math.random()*1.5}s;
+        animation-delay:${Math.random()*0.3}s;
+        border-radius:${Math.random()>0.5?'50%':'2px'};
+      `;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 3000);
+    }, i * 30);
+  }
 }
+
+// ═══════════════════════════════════════════════════════════════
+//  COLLECTION SCREEN
+// ═══════════════════════════════════════════════════════════════
+let collGameFilter = 'all';
+
+function showCollection() {
+  document.body.className = 'theme-home';
+  buildCollectionScreen();
+  showScreen('s-collection');
+}
+
+function buildCollectionScreen() {
+  const col = loadCollection();
+  const entries = Object.values(col);
+
+  // Stats
+  const totalCards = entries.reduce((s,e) => s+e.count, 0);
+  const uniqueCards = entries.length;
+  const totalValue = entries.reduce((s,e) => s+(e.card.price||0)*e.count, 0);
+  const packsOpened = parseInt(localStorage.getItem('cpo_packs')||'0');
+
+  document.getElementById('coll-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${uniqueCards}</div><div class="stat-label">Unique Cards</div></div>
+    <div class="stat-card"><div class="stat-val">${totalCards}</div><div class="stat-label">Total Copies</div></div>
+    <div class="stat-card"><div class="stat-val">$${totalValue.toFixed(2)}</div><div class="stat-label">Est. Value</div></div>
+  `;
+
+  // Game tabs
+  const games = ['all','pokemon','mtg','ygo'];
+  const gameLabels = {all:'All Games', pokemon:'Pokémon', mtg:'Magic', ygo:'Yu-Gi-Oh!'};
+  document.getElementById('coll-game-tabs').innerHTML = games.map(g =>
+    `<button class="pill-tab ${collGameFilter===g?'active':''}" onclick="setCollGame('${g}')">${gameLabels[g]}</button>`
+  ).join('');
+
+  renderSetProgress(col);
+  renderCollection();
+}
+
+function setCollGame(g) {
+  collGameFilter = g;
+  buildCollectionScreen();
+}
+
+function renderSetProgress(col) {
+  const allSets = Object.values(GAMES).flatMap(G =>
+    G.sets.map(s => ({...s, game: Object.keys(GAMES).find(k => GAMES[k]===G)}))
+  ).filter(s => collGameFilter === 'all' || s.game === collGameFilter);
+
+  const col2 = col || loadCollection();
+  const html = allSets.map(s => {
+    const owned = Object.values(col2).filter(e => e.card.setId===s.id && e.card.game===s.game).length;
+    const pct = Math.min(100, Math.round(owned/s.total*100));
+    return `<div class="set-progress-item">
+      <div class="sp-name"><span>${s.symbol} ${s.name}</span><span style="color:var(--text-dim)">${owned}/${s.total}</span></div>
+      <div class="sp-bar"><div class="sp-fill" style="width:${pct}%"></div></div>
+      <div class="sp-count">${pct}% complete</div>
+    </div>`;
+  }).join('');
+  document.getElementById('set-progress-list').innerHTML = html || '<div style="color:var(--text-muted);font-size:.85rem">Open some packs first!</div>';
+}
+
+function renderCollection() {
+  const col = loadCollection();
+  const search = document.getElementById('coll-search')?.value.toLowerCase() || '';
+  const sort = document.getElementById('coll-sort')?.value || 'recent';
+
+  let entries = Object.values(col).filter(e => {
+    if(collGameFilter !== 'all' && e.card.game !== collGameFilter) return false;
+    if(search && !e.card.name.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  const rarityOrder = (e) => {
+    const G = GAMES[e.card.game];
+    return G ? (G.rarityOrder[e.card.rarity] ?? 9) : 9;
+  };
+
+  entries.sort((a,b) => {
+    if(sort==='name') return a.card.name.localeCompare(b.card.name);
+    if(sort==='price-desc') return (b.card.price||0)-(a.card.price||0);
+    if(sort==='price-asc') return (a.card.price||0)-(b.card.price||0);
+    if(sort==='rarity') return rarityOrder(a)-rarityOrder(b);
+    return (b.addedAt||0)-(a.addedAt||0); // recent
+  });
+
+  const grid = document.getElementById('coll-grid');
+  if(!entries.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">📦</div>
+      <div>${search ? 'No cards matching your search.' : 'No cards yet — open some packs!'}</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = entries.map(e => {
+    const G = GAMES[e.card.game];
+    const rc = G ? G.rarityClass(e.card.rarity) : '';
+    const bc = G ? G.badgeClass(e.card.rarity) : '';
+    return `<div class="coll-card ${rc}">
+      <div class="coll-card-img">
+        ${e.card.image
+          ? `<img src="${e.card.image}" alt="${e.card.name}" loading="lazy" onerror="this.parentNode.innerHTML='<span class=fallback>🃏</span>'">`
+          : `<span class="fallback">🃏</span>`}
+      </div>
+      <div class="coll-card-info">
+        <div class="coll-card-name" title="${e.card.name}">${e.card.name}</div>
+        <div class="coll-card-row">
+          <span class="badge ${bc}" style="font-size:.55rem">${e.card.rarity}</span>
+          <span class="coll-card-price">${e.card.price ? '$'+e.card.price.toFixed(2) : ''}</span>
+        </div>
+        <div style="font-size:.62rem;color:var(--text-muted);margin-top:2px">${e.card.setName||''}</div>
+      </div>
+      ${e.count > 1 ? `<div class="coll-count-badge">×${e.count}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════════
+goHome();
 </script>
 </body>
 </html>
