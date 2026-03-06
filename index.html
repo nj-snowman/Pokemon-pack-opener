@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pokémon Pack Opener</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;transition:background 0.8s;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e)}
+  h1{font-size:2.2rem;font-weight:800;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.5);margin-bottom:4px}
+  .subtitle{color:#aaa;font-size:.9rem;margin-bottom:8px}
+  .trigger{background:#000;border:1px solid #333;color:#fde047;font-family:monospace;padding:2px 10px;border-radius:6px;font-size:.85rem}
+  .btn{cursor:pointer;border:none;font-weight:700;border-radius:12px;transition:transform .15s,box-shadow .15s;padding:12px 32px;font-size:1rem}
+  .btn:hover{transform:scale(1.05)}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:#facc15;color:#1a1a1a;box-shadow:0 4px 20px rgba(250,204,21,0.4)}
+  .btn-secondary{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2)}
+  .set-badge{font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:4px}
+  .order-hint{color:#aaa;font-size:.75rem;margin-bottom:2px}
+  .order-hint span{margin:0 3px}
+  .counter{color:#777;font-size:.75rem;margin-bottom:12px}
+  #grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;max-width:700px;margin-bottom:16px}
+  .card-wrap{border-radius:12px;border:2px solid #444;background:#111;overflow:hidden;display:flex;flex-direction:column;min-height:170px;transition:transform .2s,box-shadow .2s;position:relative}
+  .card-wrap.face-down{opacity:.3;cursor:default}
+  .card-wrap.current{border-color:#6366f1;opacity:1;cursor:pointer;animation:pulse 1.4s infinite}
+  .card-wrap.current:hover{transform:scale(1.06)}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.5)}50%{box-shadow:0 0 0 8px rgba(99,102,241,0)}}
+  .card-img-wrap{height:120px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .card-img-wrap img{width:100%;height:100%;object-fit:contain;display:block}
+  .card-img-wrap .fallback{font-size:2rem;color:#555}
+  .card-info{padding:6px 4px;text-align:center}
+  .card-name{color:#eee;font-size:.7rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .badge{display:inline-block;margin-top:3px;padding:1px 7px;border-radius:99px;font-size:.6rem;font-weight:700}
+  .holo-overlay{position:absolute;inset:0;pointer-events:none;border-radius:10px;overflow:hidden;z-index:5}
+  .holo-overlay::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 25%,rgba(255,215,0,.28) 45%,rgba(255,80,200,.18) 55%,transparent 75%);animation:shimmer 2.2s ease-in-out infinite}
+  @keyframes shimmer{0%{transform:translateX(-120%) skewX(-12deg)}100%{transform:translateX(220%) skewX(-12deg)}}
+  .face-down .card-img-wrap::after,.face-down .card-info{display:none}
+  .face-down .card-img-wrap{height:100%;min-height:130px;background:repeating-linear-gradient(135deg,#1a1a2e 0,#1a1a2e 10px,#16213e 10px,#16213e 20px)}
+  .current .card-img-wrap{height:100%;min-height:130px;background:linear-gradient(135deg,#1e1b4b,#312e81);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+  .current .tap-hint{color:#c7d2fe;font-size:.7rem;font-weight:700}
+  .current .card-icon{font-size:2rem}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+  .holo-wrap .card-wrap{border-color:#f59e0b}
+  .result-msg{color:#fde047;font-weight:700;font-size:1.1rem;margin-bottom:8px;text-align:center}
+  .result-sub{color:#888;font-size:.8rem;margin-bottom:12px;text-align:center}
+  #idle-screen,#pack-screen{display:flex;flex-direction:column;align-items:center}
+  #pack-screen{width:100%;max-width:720px}
+  /* rarity colours */
+  .r-holo{border-color:#f59e0b!important;background:linear-gradient(135deg,#1c1400,#2d1f00)}
+  .r-rare{border-color:#ca8a04!important}
+  .r-uncommon{border-color:#3b82f6!important}
+  .r-common{border-color:#6b7280!important}
+  .r-energy{border-color:#10b981!important}
+  .b-holo{background:#f59e0b;color:#000}
+  .b-rare{background:#ca8a04;color:#fff}
+  .b-uncommon{background:#3b82f6;color:#fff}
+  .b-common{background:#6b7280;color:#fff}
+  .b-energy{background:#10b981;color:#fff}
+  /* bg themes */
+  body.bg-base{background:linear-gradient(135deg,#0c1a3a,#1e3a5f,#3b2a00)}
+  body.bg-jungle{background:linear-gradient(135deg,#052e16,#14532d,#365314)}
+  body.bg-fossil{background:linear-gradient(135deg,#1c1008,#3b2412,#44381c)}
+</style>
+</head>
+<body>
+
+<div id="idle-screen">
+  <div style="font-size:4.5rem;margin-bottom:12px">🎴</div>
+  <h1>Pokémon Pack Opener</h1>
+  <div class="subtitle">Base Set · Jungle · Fossil</div>
+  <div style="margin-bottom:24px;color:#888;font-size:.85rem">Type <span class="trigger">RIP!</span> to tear one open</div>
+  <button class="btn btn-primary" onclick="startOpen()">🎰 Rip a Pack!</button>
+</div>
+
+<div id="pack-screen" style="display:none">
+  <div class="set-badge" id="set-label"></div>
+  <div class="order-hint">
+    <span style="color:#fde047">✨ Rare</span>→
+    <span style="color:#60a5fa">💠 ×3 Uncommon</span>→
+    <span style="color:#d1d5db">⚪ ×5 Common</span>→
+    <span style="color:#6ee7b7">🔋 Energy</span>
+  </div>
+  <div class="counter" id="counter">0/10 revealed</div>
+  <div id="grid"></div>
+  <div id="result-area" style="display:none">
+    <div class="result-msg" id="result-msg"></div>
+    <div class="result-sub" id="result-sub"></div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="revealNext()" id="btn-next">Reveal Next →</button>
+    <button class="btn btn-secondary" onclick="revealAll()" id="btn-all">Reveal All</button>
+    <button class="btn btn-primary" onclick="startOpen()" id="btn-another" style="display:none">🎰 Rip Another</button>
+    <button class="btn btn-secondary" onclick="goIdle()" id="btn-back" style="display:none">Back</button>
+  </div>
+</div>
+
+<script>
+// ── Card data ────────────────────────────────────────────────────────────────
+const DB = {
+  "Alakazam":"base1-1","Blastoise":"base1-2","Chansey":"base1-3","Charizard":"base1-4",
+  "Clefairy":"base1-5","Gyarados":"base1-6","Hitmonchan":"base1-7","Machamp":"base1-8",
+  "Magneton":"base1-9","Mewtwo":"base1-10","Nidoking":"base1-11","Ninetales":"base1-12",
+  "Poliwrath":"base1-13","Raichu":"base1-14","Venusaur":"base1-15","Zapdos":"base1-16",
+  "Beedrill":"base1-17","Dragonair":"base1-18","Dewgong":"base1-19","Dugtrio":"base1-20",
+  "Electrode":"base1-21","Pidgeot":"base1-22","Arcanine":"base1-23","Charmeleon":"base1-24",
+  "Clefable":"base1-25","Haunter":"base1-29","Ivysaur":"base1-30","Jynx":"base1-31",
+  "Kadabra":"base1-32","Lickitung":"base1-33","Machoke":"base1-34","Magikarp":"base1-35",
+  "Magmar":"base1-36","Nidoqueen":"base1-37","Poliwhirl":"base1-38","Porygon":"base1-39",
+  "Rhydon":"base1-40","Snorlax":"base1-41","Wartortle":"base1-42","Weepinbell":"base1-43",
+  "Bulbasaur":"base1-44","Caterpie":"base1-45","Charmander":"base1-46","Diglett":"base1-47",
+  "Doduo":"base1-48","Drowzee":"base1-49","Gastly":"base1-50","Koffing":"base1-51",
+  "Machop":"base1-52","Magnemite":"base1-53","Metapod":"base1-54","Onix":"base1-56",
+  "Pidgey":"base1-57","Pikachu":"base1-58","Poliwag":"base1-59","Ponyta":"base1-60",
+  "Rattata":"base1-61","Sandshrew":"base1-62","Seel":"base1-63","Squirtle":"base1-64",
+  "Staryu":"base1-65","Tentacool":"base1-66","Venonat":"base1-67","Voltorb":"base1-68",
+  "Weedle":"base1-69","Zubat":"base1-70",
+  "Computer Search":"base1-71","Devolution Spray":"base1-72","Item Finder":"base1-74",
+  "Lass":"base1-75","Pokemon Breeder":"base1-76","Pokemon Trader":"base1-77",
+  "Scoop Up":"base1-78","Super Energy Removal":"base1-79","Defender":"base1-80",
+  "Energy Retrieval":"base1-81","Full Heal":"base1-82","Maintenance":"base1-83",
+  "PlusPower":"base1-84","Pokedex":"base1-87","Professor Oak":"base1-88",
+  "Revive":"base1-89","Super Potion":"base1-90",
+  "Fire Energy":"base1-98","Fighting Energy":"base1-97","Grass Energy":"base1-99",
+  "Lightning Energy":"base1-100","Psychic Energy":"base1-101","Water Energy":"base1-102",
+  // Jungle
+  "Clefable (J)":"jungle-1","Electrode (J)":"jungle-2","Flareon":"jungle-3","Jolteon":"jungle-4",
+  "Kangaskhan":"jungle-5","Mr. Mime":"jungle-6","Nidoqueen (J)":"jungle-7","Pidgeot (J)":"jungle-8",
+  "Pinsir":"jungle-9","Scyther":"jungle-10","Snorlax (J)":"jungle-11","Vaporeon":"jungle-12",
+  "Venomoth":"jungle-13","Victreebel":"jungle-14","Vileplume":"jungle-15","Wigglytuff":"jungle-16",
+  "Butterfree":"jungle-17","Dodrio":"jungle-20","Exeggutor":"jungle-22","Marowak":"jungle-26",
+  "Nidorina":"jungle-25","Parasect":"jungle-27","Persian":"jungle-28","Primeape":"jungle-43",
+  "Rapidash":"jungle-44","Seaking":"jungle-46","Tauros":"jungle-47",
+  "Bellsprout":"jungle-49","Cubone":"jungle-50","Exeggcute":"jungle-52","Goldeen":"jungle-53",
+  "Jigglypuff":"jungle-54","Mankey":"jungle-55","Meowth":"jungle-56","Oddish":"jungle-58",
+  "Paras":"jungle-59","Pikachu (J)":"jungle-60","Rhyhorn":"jungle-61","Spearow":"jungle-62",
+  "Weepinbell (J)":"jungle-63",
+  // Fossil
+  "Aerodactyl":"fossil-1","Articuno":"fossil-2","Ditto":"fossil-3","Dragonite":"fossil-4",
+  "Gengar":"fossil-5","Hitmonlee":"fossil-6","Hypno":"fossil-8","Kabutops":"fossil-9",
+  "Lapras":"fossil-10","Moltres":"fossil-12","Muk":"fossil-13","Slowbro":"fossil-14",
+  "Haunter (F)":"fossil-7","Magneton (F)":"fossil-11","Raichu (F)":"fossil-14","Zapdos (F)":"fossil-15",
+  "Arbok":"fossil-31","Cloyster":"fossil-32","Golbat":"fossil-33","Graveler":"fossil-34",
+  "Kingler":"fossil-35","Omastar":"fossil-36","Sandslash":"fossil-37","Seadra":"fossil-38",
+  "Slowpoke":"fossil-39","Tentacruel":"fossil-40","Weezing":"fossil-41","Mysterious Fossil":"fossil-62",
+  "Ekans":"fossil-46","Geodude":"fossil-47","Grimer":"fossil-48","Horsea":"fossil-49",
+  "Kabuto":"fossil-50","Krabby":"fossil-51","Omanyte":"fossil-52","Psyduck":"fossil-53",
+  "Shellder":"fossil-54","Slowpoke (F)":"fossil-55",
+};
+
+const SETS = {
+  "Base Set":{
+    bg:"bg-base",year:"1999",symbol:"🔵",
+    holos:["Alakazam","Blastoise","Chansey","Charizard","Clefairy","Gyarados","Hitmonchan","Machamp","Magneton","Mewtwo","Nidoking","Ninetales","Poliwrath","Raichu","Venusaur","Zapdos"],
+    rares:["Beedrill","Dragonair","Dewgong","Dugtrio","Electrode","Pidgeot","Arcanine","Charmeleon","Clefable","Haunter","Ivysaur","Jynx","Kadabra","Lickitung","Machoke","Magikarp","Magmar","Nidoqueen","Poliwhirl","Porygon","Rhydon","Snorlax","Wartortle","Weepinbell"],
+    uncommons:["Computer Search","Devolution Spray","Item Finder","Lass","Pokemon Breeder","Pokemon Trader","Scoop Up","Super Energy Removal","Defender","Energy Retrieval","Full Heal","Maintenance","PlusPower","Pokedex","Professor Oak","Revive","Super Potion"],
+    commons:["Bulbasaur","Caterpie","Charmander","Diglett","Doduo","Drowzee","Gastly","Koffing","Machop","Magnemite","Metapod","Onix","Pidgey","Pikachu","Poliwag","Ponyta","Rattata","Sandshrew","Seel","Squirtle","Staryu","Tentacool","Venonat","Voltorb","Weedle","Zubat"],
+    energies:["Fire Energy","Fighting Energy","Grass Energy","Lightning Energy","Psychic Energy","Water Energy"],
+  },
+  "Jungle":{
+    bg:"bg-jungle",year:"1999",symbol:"🟢",
+    holos:["Clefable (J)","Electrode (J)","Flareon","Jolteon","Kangaskhan","Mr. Mime","Nidoqueen (J)","Pidgeot (J)","Pinsir","Scyther","Snorlax (J)","Vaporeon","Venomoth","Victreebel","Vileplume","Wigglytuff"],
+    rares:["Butterfree","Dodrio","Exeggutor","Marowak","Nidorina","Parasect","Persian","Primeape","Rapidash","Seaking","Tauros"],
+    uncommons:["Butterfree","Dodrio","Exeggutor","Marowak","Nidorina","Parasect","Persian","Primeape","Rapidash","Seaking","Tauros"],
+    commons:["Bellsprout","Cubone","Exeggcute","Goldeen","Jigglypuff","Mankey","Meowth","Oddish","Paras","Pikachu (J)","Rhyhorn","Spearow","Weepinbell (J)"],
+    energies:["Grass Energy","Fire Energy","Water Energy","Lightning Energy","Fighting Energy","Psychic Energy"],
+  },
+  "Fossil":{
+    bg:"bg-fossil",year:"1999",symbol:"🟤",
+    holos:["Aerodactyl","Articuno","Ditto","Dragonite","Gengar","Hitmonlee","Hypno","Kabutops","Lapras","Moltres","Muk","Slowbro"],
+    rares:["Haunter (F)","Magneton (F)","Raichu (F)","Zapdos (F)","Aerodactyl","Articuno","Ditto","Dragonite","Gengar","Hitmonlee","Hypno","Kabutops","Lapras","Moltres","Muk","Slowbro"],
+    uncommons:["Arbok","Cloyster","Golbat","Graveler","Kingler","Omastar","Sandslash","Seadra","Slowpoke","Tentacruel","Weezing","Mysterious Fossil"],
+    commons:["Ekans","Geodude","Grimer","Horsea","Kabuto","Krabby","Omanyte","Psyduck","Shellder","Slowpoke (F)"],
+    energies:["Water Energy","Fighting Energy","Psychic Energy","Fire Energy","Lightning Energy","Grass Energy"],
+  }
+};
+
+const RARITY_CLS = {"Holo Rare":"r-holo","Rare":"r-rare","Uncommon":"r-uncommon","Common":"r-common","Energy":"r-energy"};
+const BADGE_CLS  = {"Holo Rare":"b-holo","Rare":"b-rare","Uncommon":"b-uncommon","Common":"b-common","Energy":"b-energy"};
+const FALLBACK   = {"Holo Rare":"✨","Rare":"⭐","Uncommon":"💠","Common":"⚪","Energy":"⚡"};
+
+let cards=[], revealed=0, currentSet=null;
+
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+
+function imgUrl(id){
+  const [s,n]=id.split('-');
+  return `https://images.pokemontcg.io/${s}/${n}_hires.png`;
+}
+
+function makePack(sName){
+  const S=SETS[sName], out=[];
+  // Rare slot
+  const isHolo = Math.random()<0.333;
+  const name0 = isHolo ? pick(S.holos) : pick(S.rares);
+  out.push({name:name0, rarity:isHolo?'Holo Rare':'Rare', id:DB[name0]||null});
+  for(let i=0;i<3;i++){const n=pick(S.uncommons);out.push({name:n,rarity:'Uncommon',id:DB[n]||null});}
+  for(let i=0;i<5;i++){const n=pick(S.commons);  out.push({name:n,rarity:'Common',  id:DB[n]||null});}
+  const en=pick(S.energies); out.push({name:en,rarity:'Energy',id:DB[en]||null});
+  return out;
+}
+
+function renderGrid(){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  cards.forEach((card,i)=>{
+    const wrap=document.createElement('div');
+    wrap.className='card-wrap';
+    wrap.id=`card-${i}`;
+    if(i<revealed){
+      revealCard(wrap,card);
+    } else if(i===revealed){
+      wrap.classList.add('current');
+      wrap.innerHTML=`<div class="card-img-wrap"><span class="card-icon">🎴</span><span class="tap-hint">Tap to reveal</span></div>`;
+      wrap.onclick=()=>revealNext();
+    } else {
+      wrap.classList.add('face-down');
+      wrap.innerHTML=`<div class="card-img-wrap"></div>`;
+    }
+    grid.appendChild(wrap);
+  });
+}
+
+function revealCard(wrap, card){
+  wrap.className=`card-wrap ${RARITY_CLS[card.rarity]}`;
+  wrap.onclick=null;
+  const imgId=DB[card.name];
+  let imgHtml='';
+  if(imgId){
+    const url=imgUrl(imgId);
+    imgHtml=`<img src="${url}" alt="${card.name}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+             <span class="fallback" style="display:none">${FALLBACK[card.rarity]}</span>`;
+  } else {
+    imgHtml=`<span class="fallback">${FALLBACK[card.rarity]}</span>`;
+  }
+  wrap.innerHTML=`
+    ${card.rarity==='Holo Rare'?'<div class="holo-overlay"></div>':''}
+    <div class="card-img-wrap">${imgHtml}</div>
+    <div class="card-info">
+      <div class="card-name" title="${card.name}">${card.name}</div>
+      <span class="badge ${BADGE_CLS[card.rarity]}">${card.rarity}</span>
+    </div>`;
+}
+
+function updateCounter(){
+  document.getElementById('counter').textContent=`${revealed}/10 revealed`;
+}
+
+function revealNext(){
+  if(revealed>=10) return;
+  const wrap=document.getElementById(`card-${revealed}`);
+  revealCard(wrap, cards[revealed]);
+  revealed++;
+  updateCounter();
+  // Advance "current" pointer
+  if(revealed<10){
+    const next=document.getElementById(`card-${revealed}`);
+    next.classList.remove('face-down');
+    next.classList.add('current');
+    next.innerHTML=`<div class="card-img-wrap"><span class="card-icon">🎴</span><span class="tap-hint">Tap to reveal</span></div>`;
+    next.onclick=()=>revealNext();
+  }
+  if(revealed===10) finishPack();
+}
+
+function revealAll(){
+  while(revealed<10) revealNext();
+}
+
+function finishPack(){
+  document.getElementById('btn-next').style.display='none';
+  document.getElementById('btn-all').style.display='none';
+  document.getElementById('btn-another').style.display='inline-block';
+  document.getElementById('btn-back').style.display='inline-block';
+  const isHolo=cards[0].rarity==='Holo Rare';
+  const ra=document.getElementById('result-area');
+  ra.style.display='block';
+  document.getElementById('result-msg').textContent=isHolo?'✨ HOLO RARE! What a pull!':'No holo this time...';
+  document.getElementById('result-sub').textContent=isHolo?`You pulled a ${cards[0].name}!`:'Better luck next pack.';
+}
+
+function startOpen(){
+  const keys=Object.keys(SETS);
+  const sName=keys[Math.floor(Math.random()*keys.length)];
+  currentSet=sName;
+  cards=makePack(sName);
+  revealed=0;
+  // Set background
+  document.body.className=SETS[sName].bg;
+  // Labels
+  document.getElementById('set-label').textContent=`${SETS[sName].symbol} Pokémon ${sName} (${SETS[sName].year})`;
+  // Buttons
+  document.getElementById('btn-next').style.display='inline-block';
+  document.getElementById('btn-all').style.display='inline-block';
+  document.getElementById('btn-another').style.display='none';
+  document.getElementById('btn-back').style.display='none';
+  document.getElementById('result-area').style.display='none';
+  updateCounter();
+  renderGrid();
+  document.getElementById('idle-screen').style.display='none';
+  document.getElementById('pack-screen').style.display='flex';
+}
+
+function goIdle(){
+  document.body.className='';
+  document.getElementById('pack-screen').style.display='none';
+  document.getElementById('idle-screen').style.display='flex';
+}
+</script>
+</body>
+</html>
